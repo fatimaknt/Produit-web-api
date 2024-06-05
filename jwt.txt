@@ -1,0 +1,95 @@
+namespace jwt.WebApi
+{
+    public class Startup
+    {
+        public IConfiguration configuration { get; }
+
+        public Startup(IConfiguration configuration)
+        {
+            this.configuration = configuration;
+        }
+
+        public void ConfigureService(IServiceCollection services)
+        {
+            // Add services to the container.
+
+            services.AddControllers();
+            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            services.AddEndpointsApiExplorer();
+            services.AddSwaggerGen();
+        }
+        //methode pour configurer l'application
+        public void ConfigureApplication(IApplicationBuilder app,IWebHostEnvironment env)
+        {
+            // Configure the HTTP request pipeline.
+            if (env.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
+
+            app.UseHttpsRedirection();
+
+            app.UseRouting();
+
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
+
+          
+        }
+    }
+}
+
+
+-------------------------------------------------
+UrlFront dans la methode Startup
+ public void ConfigureServices(IServiceCollection services)
+ {
+     services.AddControllers();
+     // Configuration de la base de données
+     services.AddDbContext<AppDBContext>(options =>
+         options.UseSqlServer(configuration.GetConnectionString("defaultConnection")),
+         ServiceLifetime.Transient);
+     services.AddCors(options =>
+     {
+         var frontEndUrl = configuration.GetValue<String>("UrlFrontEnd");
+         options.AddDefaultPolicy(builder =>
+         {
+             builder
+             .WithOrigins(frontEndUrl)
+             .AllowAnyMethod()
+             .AllowAnyHeader();
+
+         });
+     });
+     services.AddEndpointsApiExplorer();
+     services.AddSwaggerGen();
+ }
+
+
+
+    public class AppDBContext : DbContext
+    {
+        public AppDBContext(DbContextOptions<AppDBContext> options) : base(options) { }
+
+        public DbSet<User> users { get; set; }
+
+-------------------------------------------------------------
+
+Ligne de commande 
+
+
+
+CREATE TABLE products(
+id INT NOT NULL PRIMARY KEY IDENTITY,
+name NVARCHAR(100) NOT NULL,
+brand NVARCHAR(100) NOT NULL,
+category NVARCHAR(100) NOT NULL,
+price DECIMAL (16, 2) NOT NULL,
+description NVARCHAR (MAX) NOT NULL,
+created_at DATETIME2 NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
